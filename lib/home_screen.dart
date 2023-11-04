@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'open_dialog_future.dart';
+import 'open_dialog_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,30 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(top: 20, left: 10),
           child: Column(
             children: [
-              TextButton(
-                onPressed: () {
-                  openDialog(context);
-                },
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle_outline_rounded),
-                    SizedBox(width: 10),
-                    Text('Adicionar item')
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  openDialog(context);
-                },
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle_outline_rounded),
-                    SizedBox(width: 10),
-                    Text('Adicionar item')
-                  ],
-                ),
-              ),
+              OpenDialogWidget(),
             ],
           ),
         ),
