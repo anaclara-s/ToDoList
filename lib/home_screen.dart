@@ -14,9 +14,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(top: 20, left: 10),
+          padding: EdgeInsets.only(top: 20, left: 10),
           child: Column(
             children: [
               OpenDialogWidget(),

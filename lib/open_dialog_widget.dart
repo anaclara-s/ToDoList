@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class OpenDialogWidget extends StatefulWidget {
   const OpenDialogWidget({super.key});
@@ -39,7 +40,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                 itemList.add(texto);
               });
             },
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.add_circle_outline_rounded),
                 SizedBox(width: 10),
@@ -48,12 +49,19 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: itemList.length,
-              itemBuilder: (context, index) {
-                return Text(itemList[index]);
-              },
-            ),
+            child: ReorderableListView(
+                onReorder: _onReorder,
+                children: itemList
+                    .asMap()
+                    .entries
+                    .map((entry) => _buildListTitle(entry.value, entry.key))
+                    .toList()
+                // .map((Widget w) => Container(
+                //       key: ValueKey(w),
+                //       child: w,
+                //     ))
+                // .toList(),
+                ),
           ),
           TextButton(
             onPressed: () async {
@@ -63,7 +71,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                 itemList.add(texto);
               });
             },
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.add_circle_outline_rounded),
                 SizedBox(width: 10),
@@ -79,28 +87,77 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   Future<String?> openDialog(BuildContext context) => showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Adcionar item'),
+          title: const Text('Adcionar item'),
           content: TextField(
             controller: controller,
             autofocus: true,
           ),
           actions: [
             TextButton(
-              onPressed: () {},
-              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: addtask,
-              child: Text('Ok'),
+              child: const Text('Ok'),
             ),
           ],
         ),
       );
+
+  Widget _buildListTitle(String item, int index) {
+    // GlobalKey _listTileKey = GlobalKey();
+
+    return Dismissible(
+      key: Key(item),
+      onDismissed: (direction) {
+        setState(() {
+          itemList.removeAt(index);
+        });
+      },
+      child: ListTile(
+        title: Text(item),
+        leading: GestureDetector(
+          onTap: () {
+            if (index > 0) {
+              setState(() {
+                final String currentItem = itemList[index];
+                itemList.removeAt(index);
+                itemList.insert(index - 1, currentItem);
+              });
+            }
+          },
+          child: Icon(MdiIcons.unfoldMoreHorizontal),
+        ),
+        trailing: InkWell(
+          onTap: () {
+            setState(() {
+              itemList.remove(item);
+            });
+          },
+          child: Icon(MdiIcons.alphaX),
+        ),
+      ),
+    );
+  }
+
   void addtask() {
     setState(() {
       itemList.add(controller.text);
       controller.clear();
     });
     Navigator.of(context).pop();
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final String item = itemList.removeAt(oldIndex);
+      itemList.insert(newIndex, item);
+    });
   }
 }
