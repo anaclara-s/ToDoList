@@ -11,6 +11,9 @@ class OpenDialogWidget extends StatefulWidget {
 class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   late TextEditingController controller;
   List<String> itemList = [];
+  List<bool> isEditing = [];
+  bool isEditingItem = false;
+  String editedText = '';
   String texto = '';
 
   @override
@@ -29,7 +32,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 350,
+      height: 800,
       child: Column(
         children: [
           TextButton(
@@ -38,47 +41,40 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
               if (texto == null || texto.isEmpty) return;
               setState(() {
                 itemList.add(texto);
+                isEditing.add(false);
               });
             },
             child: const Row(
               children: [
-                Icon(Icons.add_circle_outline_rounded),
+                Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: Color.fromARGB(255, 161, 99, 202),
+                  size: 25,
+                ),
                 SizedBox(width: 10),
-                Text('Adicionar item')
+                Text(
+                  'Adicionar item',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 161, 99, 202),
+                    fontSize: 17,
+                  ),
+                ),
               ],
             ),
+          ),
+          const SizedBox(
+            height: 15,
           ),
           Expanded(
             child: ReorderableListView(
-                onReorder: _onReorder,
-                children: itemList
-                    .asMap()
-                    .entries
-                    .map((entry) => _buildListTitle(entry.value, entry.key))
-                    .toList()
-                // .map((Widget w) => Container(
-                //       key: ValueKey(w),
-                //       child: w,
-                //     ))
-                // .toList(),
-                ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final texto = await openDialog(context);
-              if (texto == null || texto.isEmpty) return;
-              setState(() {
-                itemList.add(texto);
-              });
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.add_circle_outline_rounded),
-                SizedBox(width: 10),
-                Text('Adicionar item')
-              ],
+              onReorder: _onReorder,
+              children: itemList
+                  .asMap()
+                  .entries
+                  .map((entry) => _buildListTitle(entry.value, entry.key))
+                  .toList(),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -87,8 +83,20 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   Future<String?> openDialog(BuildContext context) => showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Adcionar item'),
+          title: const Text(
+            'Adcionar item',
+            style: TextStyle(
+              color: Color.fromARGB(255, 185, 129, 255),
+            ),
+          ),
           content: TextField(
+            decoration: const InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color.fromARGB(255, 185, 129, 255),
+                ),
+              ),
+            ),
             controller: controller,
             autofocus: true,
           ),
@@ -97,28 +105,83 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancelar'),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 130, 155, 255),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             TextButton(
-              onPressed: addtask,
-              child: const Text('Ok'),
+              onPressed: () {
+                if (isEditingItem) {
+                  setState(() {
+                    itemList.remove(editedText);
+                    itemList.add(controller.text);
+                    isEditing.add(false);
+                    controller.clear();
+                    isEditingItem = false;
+                  });
+                } else {
+                  addtask();
+                }
+              },
+              child: isEditingItem
+                  ? Icon(
+                      Icons.check,
+                      color: Color.fromARGB(255, 145, 130, 255),
+                      size: 25,
+                    )
+                  : const Text(
+                      'Ok',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 145, 130, 255),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         ),
       );
 
   Widget _buildListTitle(String item, int index) {
-    // GlobalKey _listTileKey = GlobalKey();
+    TextEditingController editingController = TextEditingController(text: item);
+    String originalText = item;
 
     return Dismissible(
-      key: Key(item),
+      key: Key('$item$index'),
       onDismissed: (direction) {
         setState(() {
           itemList.removeAt(index);
+          isEditing.removeAt(index);
         });
       },
       child: ListTile(
-        title: Text(item),
+        title: isEditing[index]
+            ? TextField(
+                decoration: InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 185, 129, 255),
+                    ),
+                  ),
+                ),
+                controller: editingController,
+                autofocus: true,
+                onChanged: (newText) {
+                  setState(() {
+                    itemList[index] = newText;
+                  });
+                },
+                onSubmitted: (newText) {
+                  setState(() {
+                    isEditing[index] = false;
+                  });
+                },
+              )
+            : Text(item),
         leading: GestureDetector(
           onTap: () {
             if (index > 0) {
@@ -129,15 +192,68 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
               });
             }
           },
-          child: Icon(MdiIcons.unfoldMoreHorizontal),
+          child: Icon(
+            MdiIcons.unfoldMoreHorizontal,
+            color: const Color.fromARGB(255, 216, 159, 226),
+            size: 25,
+          ),
         ),
-        trailing: InkWell(
-          onTap: () {
-            setState(() {
-              itemList.remove(item);
-            });
-          },
-          child: Icon(MdiIcons.alphaX),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () {
+                setState(() {
+                  if (isEditing[index]) {
+                    itemList[index] = editingController.text;
+                    isEditing[index] = false;
+                  } else {
+                    isEditing[index] = true;
+                    editingController.text = itemList[index];
+                    originalText = itemList[index];
+                  }
+                });
+              },
+              child: isEditing[index]
+                  ? Icon(
+                      Icons.check_circle_outline_rounded,
+                      color: Color.fromARGB(255, 108, 32, 170),
+                      size: 25,
+                    )
+                  : Icon(
+                      Icons.create_rounded,
+                      color: Color.fromARGB(255, 108, 32, 170),
+                      size: 25,
+                    ),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  if (isEditing[index]) {
+                    isEditing[index] = false;
+                    editingController.text = originalText;
+                  } else {
+                    itemList.removeAt(index);
+                    isEditing.removeAt(index);
+                  }
+                });
+              },
+              child: isEditing[index]
+                  ? Icon(
+                      Icons.cancel_outlined,
+                      color: Color.fromARGB(255, 108, 32, 170),
+                      size: 25,
+                    )
+                  : const Icon(
+                      Icons.close,
+                      color: Color.fromARGB(255, 108, 32, 170),
+                      size: 25,
+                    ),
+            ),
+          ],
         ),
       ),
     );
@@ -146,6 +262,8 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   void addtask() {
     setState(() {
       itemList.add(controller.text);
+      isEditing.add(false);
+      isEditingItem = false;
       controller.clear();
     });
     Navigator.of(context).pop();
