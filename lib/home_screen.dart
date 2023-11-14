@@ -53,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       deletedItems.add(item);
                     });
                   },
-                  deletedItems: deletedItems,
                 ),
               ],
             ),

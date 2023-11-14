@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'constant.dart';
-import 'custons/text_button_custom.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+import 'constant.dart';
+import 'custons/text_button_custom.dart';
 import 'custons/text_field_custom.dart';
 
 class OpenDialogWidget extends StatefulWidget {
   final Function(String) onItemDeleted;
-  final List<String> deletedItems;
 
   const OpenDialogWidget({
     Key? key,
     required this.onItemDeleted,
-    required this.deletedItems,
   }) : super(key: key);
 
   @override
@@ -26,11 +24,6 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   List<String> deletedItems = [];
   bool isEditingItem = false;
   String editedText = '';
-  String texto = '';
-
-  // void onItemDeleted(String item) {
-  //   widget.onItemDeleted(item);
-  // }
 
   void _showSnackbar(String message, String deletedItem) {
     setState(() {
