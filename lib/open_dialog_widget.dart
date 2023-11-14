@@ -6,7 +6,14 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'custons/text_field_custom.dart';
 
 class OpenDialogWidget extends StatefulWidget {
-  const OpenDialogWidget({super.key});
+  final Function(String) onItemDeleted;
+  final List<String> deletedItems;
+
+  const OpenDialogWidget({
+    Key? key,
+    required this.onItemDeleted,
+    required this.deletedItems,
+  }) : super(key: key);
 
   @override
   State<OpenDialogWidget> createState() => _OpenDialogWidgetState();
@@ -16,9 +23,26 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
   late TextEditingController controller;
   List<String> itemList = [];
   List<bool> isEditing = [];
+  List<String> deletedItems = [];
   bool isEditingItem = false;
   String editedText = '';
   String texto = '';
+
+  // void onItemDeleted(String item) {
+  //   widget.onItemDeleted(item);
+  // }
+
+  void _showSnackbar(String message, String deletedItem) {
+    setState(() {
+      deletedItems.add(deletedItem);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -35,36 +59,38 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 800,
-      child: Column(
-        children: [
-          TextButtonCustom(
-            onPressed: () async {
-              final texto = await openDialog(context);
-              if (texto == null || texto.isEmpty) return;
-              setState(() {
-                itemList.add(texto);
-                isEditing.add(false);
-              });
-            },
-            buttonText: 'Adcionar item',
-            iconData: Icons.add_circle_outline_rounded,
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Expanded(
-            child: ReorderableListView(
-              onReorder: _onReorder,
-              children: itemList
-                  .asMap()
-                  .entries
-                  .map((entry) => _buildListTitle(entry.value, entry.key))
-                  .toList(),
+    return ScaffoldMessenger(
+      child: SizedBox(
+        height: 500,
+        child: Column(
+          children: [
+            TextButtonCustom(
+              onPressed: () async {
+                final texto = await openDialog(context);
+                if (texto == null || texto.isEmpty) return;
+                setState(() {
+                  itemList.add(texto);
+                  isEditing.add(false);
+                });
+              },
+              buttonText: 'Adcionar item',
+              iconData: Icons.add_circle_outline_rounded,
             ),
-          ),
-        ],
+            const SizedBox(
+              height: 15,
+            ),
+            Expanded(
+              child: ReorderableListView(
+                onReorder: _onReorder,
+                children: itemList
+                    .asMap()
+                    .entries
+                    .map((entry) => _buildListTitle(entry.value, entry.key))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -121,6 +147,8 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
           itemList.removeAt(index);
           isEditing.removeAt(index);
         });
+        widget.onItemDeleted(item);
+        _showSnackbar('Item movido para a lixeira', item);
       },
       child: ListTile(
         title: isEditing[index]
@@ -196,6 +224,8 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                     itemList.removeAt(index);
                     isEditing.removeAt(index);
                   }
+                  widget.onItemDeleted(item);
+                  _showSnackbar('Item movido para a lixeira', item);
                 });
               },
               child: isEditing[index]

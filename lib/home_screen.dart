@@ -12,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<String> deletedItems = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,23 +28,35 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DeleteScreen(),
+                  builder: (context) =>
+                      DeleteScreen(deletedItems: deletedItems),
                 ),
               );
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.delete_rounded,
             ),
           ),
         ],
       ),
-      body: const SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(top: 20, left: 10),
-          child: Column(
-            children: [
-              OpenDialogWidget(),
-            ],
+      body: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20, left: 10),
+            child: Column(
+              children: [
+                OpenDialogWidget(
+                  onItemDeleted: (item) {
+                    setState(() {
+                      deletedItems.add(item);
+                    });
+                  },
+                  deletedItems: deletedItems,
+                ),
+              ],
+            ),
           ),
         ),
       ),
