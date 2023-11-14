@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import 'constant.dart';
 
@@ -28,6 +29,28 @@ class _DeleteScreenState extends State<DeleteScreen> {
             itemBuilder: (context, index) {
               return ListTile(
                 title: Text(widget.deletedItems[index]),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        MdiIcons.deleteRestore,
+                        color: kIconColor,
+                        size: 25,
+                      ),
+                      onPressed: () {},
+                    ),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.delete_forever_rounded,
+                        color: kIconRemoveColor,
+                        size: 25,
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
