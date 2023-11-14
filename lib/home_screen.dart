@@ -14,7 +14,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 217, 176, 245),
+        title: const Text('TO DO LIST'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 176, 186, 245),
         elevation: 2,
       ),
       body: const SingleChildScrollView(

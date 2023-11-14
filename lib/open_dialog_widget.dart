@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'constant.dart';
+import 'custons/text_button_custom.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+import 'custons/text_field_custom.dart';
 
 class OpenDialogWidget extends StatefulWidget {
   const OpenDialogWidget({super.key});
@@ -35,7 +39,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
       height: 800,
       child: Column(
         children: [
-          TextButton(
+          TextButtonCustom(
             onPressed: () async {
               final texto = await openDialog(context);
               if (texto == null || texto.isEmpty) return;
@@ -44,23 +48,8 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                 isEditing.add(false);
               });
             },
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.add_circle_outline_rounded,
-                  color: Color.fromARGB(255, 161, 99, 202),
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Adicionar item',
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 161, 99, 202),
-                    fontSize: 17,
-                  ),
-                ),
-              ],
-            ),
+            buttonText: 'Adcionar item',
+            iconData: Icons.add_circle_outline_rounded,
           ),
           const SizedBox(
             height: 15,
@@ -86,34 +75,21 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
           title: const Text(
             'Adcionar item',
             style: TextStyle(
-              color: Color.fromARGB(255, 185, 129, 255),
+              color: kTextFieldTextColor,
             ),
           ),
-          content: TextField(
-            decoration: const InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color.fromARGB(255, 185, 129, 255),
-                ),
-              ),
-            ),
+          content: CustomTextField(
             controller: controller,
             autofocus: true,
           ),
           actions: [
-            TextButton(
+            TextButtonCustom(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 130, 155, 255),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              buttonText: 'Cancelar',
             ),
-            TextButton(
+            TextButtonCustom(
               onPressed: () {
                 if (isEditingItem) {
                   setState(() {
@@ -127,20 +103,8 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                   addtask();
                 }
               },
-              child: isEditingItem
-                  ? Icon(
-                      Icons.check,
-                      color: Color.fromARGB(255, 145, 130, 255),
-                      size: 25,
-                    )
-                  : const Text(
-                      'Ok',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 145, 130, 255),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+              buttonText: isEditingItem ? 'Check' : 'Ok',
+              iconData: isEditingItem ? Icons.check : null,
             ),
           ],
         ),
@@ -160,14 +124,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
       },
       child: ListTile(
         title: isEditing[index]
-            ? TextField(
-                decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color.fromARGB(255, 185, 129, 255),
-                    ),
-                  ),
-                ),
+            ? CustomTextField(
                 controller: editingController,
                 autofocus: true,
                 onChanged: (newText) {
@@ -194,7 +151,7 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
           },
           child: Icon(
             MdiIcons.unfoldMoreHorizontal,
-            color: const Color.fromARGB(255, 216, 159, 226),
+            color: kIconColor,
             size: 25,
           ),
         ),
@@ -215,14 +172,14 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                 });
               },
               child: isEditing[index]
-                  ? Icon(
+                  ? const Icon(
                       Icons.check_circle_outline_rounded,
-                      color: Color.fromARGB(255, 108, 32, 170),
+                      color: kIconAddColor,
                       size: 25,
                     )
-                  : Icon(
+                  : const Icon(
                       Icons.create_rounded,
-                      color: Color.fromARGB(255, 108, 32, 170),
+                      color: kIconEditingColor,
                       size: 25,
                     ),
             ),
@@ -242,14 +199,14 @@ class _OpenDialogWidgetState extends State<OpenDialogWidget> {
                 });
               },
               child: isEditing[index]
-                  ? Icon(
+                  ? const Icon(
                       Icons.cancel_outlined,
-                      color: Color.fromARGB(255, 108, 32, 170),
+                      color: kIconRemoveColor,
                       size: 25,
                     )
                   : const Icon(
                       Icons.close,
-                      color: Color.fromARGB(255, 108, 32, 170),
+                      color: kIconRemoveColor,
                       size: 25,
                     ),
             ),
