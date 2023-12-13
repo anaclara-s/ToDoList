@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import 'constant.dart';
-import 'custons/text_button_custom.dart';
-import 'custons/text_field_custom.dart';
+import '../../shared/constant.dart';
+import '../../shared/widgets/custom_textbutton.dart';
+import '../../shared/widgets/custom_textfield.dart';
 
-class OpenDialogWidget extends StatefulWidget {
+class TodoPage extends StatefulWidget {
   final Function(String) onItemDeleted;
 
-  const OpenDialogWidget({
+  const TodoPage({
     Key? key,
     required this.onItemDeleted,
   }) : super(key: key);
 
   @override
-  State<OpenDialogWidget> createState() => _OpenDialogWidgetState();
+  State<TodoPage> createState() => _TodoPageState();
 }
 
-class _OpenDialogWidgetState extends State<OpenDialogWidget> {
+class _TodoPageState extends State<TodoPage> {
   late TextEditingController controller;
   List<String> itemList = [];
   List<bool> isEditing = [];

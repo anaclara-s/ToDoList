@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lista_tarefas/constant.dart';
+import 'package:lista_tarefas/shared/constant.dart';
 
 class TextButtonCustom extends StatefulWidget {
   final void Function()? onPressed;

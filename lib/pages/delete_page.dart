@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import 'constant.dart';
+import '../shared/constant.dart';
 
-class DeleteScreen extends StatefulWidget {
+class DeletePage extends StatefulWidget {
   final List<String> deletedItems;
-  const DeleteScreen({Key? key, required this.deletedItems}) : super(key: key);
+  const DeletePage({Key? key, required this.deletedItems}) : super(key: key);
 
   @override
-  State<DeleteScreen> createState() => _DeleteScreenState();
+  State<DeletePage> createState() => _DeletePageState();
 }
 
-class _DeleteScreenState extends State<DeleteScreen> {
+class _DeletePageState extends State<DeletePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'delete_screen.dart';
-import 'constant.dart';
-import 'open_dialog_widget.dart';
+import 'delete_page.dart';
+import '../shared/constant.dart';
+import 'todo_page/todo_page.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomePageState extends State<HomePage> {
   List<String> deletedItems = [];
 
   @override
@@ -28,8 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      DeleteScreen(deletedItems: deletedItems),
+                  builder: (context) => DeletePage(deletedItems: deletedItems),
                 ),
               );
             },
@@ -47,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(top: 20, left: 10),
             child: Column(
               children: [
-                OpenDialogWidget(
+                TodoPage(
                   onItemDeleted: (item) {
                     setState(() {
                       deletedItems.add(item);
