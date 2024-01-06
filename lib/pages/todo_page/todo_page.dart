@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../../shared/constant.dart';
-import '../../shared/widgets/custom_textbutton.dart';
-import '../../shared/widgets/custom_textfield.dart';
+import '../delete_page.dart';
+import 'todo_store.dart';
+
+import '../../shared/widgets/custom_alert_dialog.dart';
 
 class TodoPage extends StatefulWidget {
-  final Function(String) onItemDeleted;
-
   const TodoPage({
     Key? key,
-    required this.onItemDeleted,
   }) : super(key: key);
 
   @override
@@ -18,244 +18,151 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  late TextEditingController controller;
-  List<String> itemList = [];
-  List<bool> isEditing = [];
-  List<String> deletedItems = [];
-  bool isEditingItem = false;
-  String editedText = '';
+  final TodoStore _todoStore = TodoStore();
 
-  void _showSnackbar(String message, String deletedItem) {
-    setState(() {
-      deletedItems.add(deletedItem);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  }
+  final FocusNode _focusNode = FocusNode();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-
-    controller = TextEditingController();
+    _todoStore.loadLists();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _todoStore.todoTextController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      child: SizedBox(
-        height: 500,
-        child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('TO DO LIST'),
+        centerTitle: true,
+        backgroundColor: kAppBarColor,
+        elevation: 2,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      DeletePage(_todoStore, _todoStore.deletedTasks),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.delete_rounded,
+            ),
+          ),
+        ],
+      ),
+      body: Observer(
+        builder: (_) => Column(
           children: [
-            TextButtonCustom(
-              onPressed: () async {
-                final texto = await openDialog(context);
-                if (texto == null || texto.isEmpty) return;
-                setState(() {
-                  itemList.add(texto);
-                  isEditing.add(false);
-                });
-              },
-              buttonText: 'Adcionar item',
-              iconData: Icons.add_circle_outline_rounded,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 350,
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.disabled,
+                    child: TextFormField(
+                      controller: _todoStore.todoTextController,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      textAlign: TextAlign.center,
+                      onFieldSubmitted: (value) {
+                        _focusNode.requestFocus();
+                        if (_formKey.currentState!.validate()) {
+                          _todoStore.addTask(value);
+                        }
+                      },
+                      validator: (value) {
+                        if ((value == null || value.isEmpty)) {
+                          return 'Por Favor, preencha o campo';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(
-              height: 15,
-            ),
-            Expanded(
-              child: ReorderableListView(
-                onReorder: _onReorder,
-                children: itemList
-                    .asMap()
-                    .entries
-                    .map((entry) => _buildListTitle(entry.value, entry.key))
-                    .toList(),
+            Observer(
+              builder: (_) => Expanded(
+                child: Container(
+                  color: const Color.fromARGB(255, 197, 187, 186),
+                  child: ReorderableListView(
+                    shrinkWrap: true,
+                    onReorder: ((oldIndex, newIndex) {
+                      setState(() {
+                        if (newIndex > oldIndex) {
+                          newIndex -= 1;
+                        }
+                        final String item = _todoStore.tasks.removeAt(oldIndex);
+                        _todoStore.tasks.insert(newIndex, item);
+                      });
+                    }),
+                    children: _todoStore.tasks
+                        .asMap()
+                        .entries
+                        .map((entry) => ListTile(
+                              key: Key('${entry.key}-${entry.value}'),
+                              title: Center(
+                                child: Text(
+                                  entry.value,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Colors.black),
+                                ),
+                              ),
+                              leading: GestureDetector(
+                                onTap: () {},
+                                child: Icon(
+                                  MdiIcons.unfoldMoreHorizontal,
+                                  color: Colors.red,
+                                  size: 30,
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.amber,
+                                  size: 30,
+                                ),
+                                onPressed: () async {
+                                  final resp = await CustomAlertDialog.instance
+                                      .asyncConfirmDialog(
+                                    context: context,
+                                    title: 'Confirmar',
+                                    textConfirm: 'Excluir',
+                                    textCancel: 'Cancelar',
+                                    content: Text(
+                                        'Tem certeza que deseja excluir esse item?'),
+                                  );
+                                  if (resp != null && resp['resp'] == true) {
+                                    String taskToDelete =
+                                        _todoStore.tasks[entry.key];
+                                    _todoStore.removeTask(taskToDelete);
+                                  }
+                                },
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<String?> openDialog(BuildContext context) => showDialog<String>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text(
-            'Adcionar item',
-            style: TextStyle(
-              color: kTextFieldTextColor,
-            ),
-          ),
-          content: CustomTextField(
-            controller: controller,
-            autofocus: true,
-          ),
-          actions: [
-            TextButtonCustom(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              buttonText: 'Cancelar',
-            ),
-            TextButtonCustom(
-              onPressed: () {
-                if (isEditingItem) {
-                  setState(() {
-                    itemList.remove(editedText);
-                    itemList.add(controller.text);
-                    isEditing.add(false);
-                    controller.clear();
-                    isEditingItem = false;
-                  });
-                } else {
-                  addtask();
-                }
-              },
-              buttonText: isEditingItem ? 'Check' : 'Ok',
-              iconData: isEditingItem ? Icons.check : null,
-            ),
-          ],
-        ),
-      );
-
-  Widget _buildListTitle(String item, int index) {
-    TextEditingController editingController = TextEditingController(text: item);
-    String originalText = item;
-
-    return Dismissible(
-      key: Key('$item$index'),
-      onDismissed: (direction) {
-        setState(() {
-          itemList.removeAt(index);
-          isEditing.removeAt(index);
-        });
-        widget.onItemDeleted(item);
-        _showSnackbar('Item movido para a lixeira', item);
-      },
-      child: ListTile(
-        title: isEditing[index]
-            ? CustomTextField(
-                controller: editingController,
-                autofocus: true,
-                onChanged: (newText) {
-                  setState(() {
-                    itemList[index] = newText;
-                  });
-                },
-                onSubmitted: (newText) {
-                  setState(() {
-                    isEditing[index] = false;
-                  });
-                },
-              )
-            : Text(item),
-        leading: GestureDetector(
-          onTap: () {
-            if (index > 0) {
-              setState(() {
-                final String currentItem = itemList[index];
-                itemList.removeAt(index);
-                itemList.insert(index - 1, currentItem);
-              });
-            }
-          },
-          child: Icon(
-            MdiIcons.unfoldMoreHorizontal,
-            color: kIconColor,
-            size: 25,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: () {
-                setState(() {
-                  if (isEditing[index]) {
-                    itemList[index] = editingController.text;
-                    isEditing[index] = false;
-                  } else {
-                    isEditing[index] = true;
-                    editingController.text = itemList[index];
-                    originalText = itemList[index];
-                  }
-                });
-              },
-              child: isEditing[index]
-                  ? const Icon(
-                      Icons.check_circle_outline_rounded,
-                      color: kIconAddColor,
-                      size: 25,
-                    )
-                  : const Icon(
-                      Icons.create_rounded,
-                      color: kIconEditingColor,
-                      size: 25,
-                    ),
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  if (isEditing[index]) {
-                    isEditing[index] = false;
-                    editingController.text = originalText;
-                  } else {
-                    itemList.removeAt(index);
-                    isEditing.removeAt(index);
-                  }
-                  widget.onItemDeleted(item);
-                  _showSnackbar('Item movido para a lixeira', item);
-                });
-              },
-              child: isEditing[index]
-                  ? const Icon(
-                      Icons.cancel_outlined,
-                      color: kIconRemoveColor,
-                      size: 25,
-                    )
-                  : const Icon(
-                      Icons.close,
-                      color: kIconRemoveColor,
-                      size: 25,
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void addtask() {
-    setState(() {
-      itemList.add(controller.text);
-      isEditing.add(false);
-      isEditingItem = false;
-      controller.clear();
-    });
-    Navigator.of(context).pop();
-  }
-
-  void _onReorder(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-      final String item = itemList.removeAt(oldIndex);
-      itemList.insert(newIndex, item);
-    });
   }
 }

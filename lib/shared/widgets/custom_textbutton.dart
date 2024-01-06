@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lista_tarefas/shared/constant.dart';
 
-class TextButtonCustom extends StatefulWidget {
+class CustomTextButton extends StatefulWidget {
   final void Function()? onPressed;
   final String buttonText;
   final IconData? iconData;
   final Widget? child;
 
-  const TextButtonCustom(
+  const CustomTextButton(
       {super.key,
       this.onPressed,
       required this.buttonText,
@@ -15,10 +15,10 @@ class TextButtonCustom extends StatefulWidget {
       this.child});
 
   @override
-  State<TextButtonCustom> createState() => _TextButtonCustomState();
+  State<CustomTextButton> createState() => _CustomTextButtonState();
 }
 
-class _TextButtonCustomState extends State<TextButtonCustom> {
+class _CustomTextButtonState extends State<CustomTextButton> {
   @override
   Widget build(BuildContext context) {
     return TextButton(
@@ -26,7 +26,7 @@ class _TextButtonCustomState extends State<TextButtonCustom> {
       child: widget.child ??
           Row(
             children: [
-              if (widget.iconData != null)
+              if (widget.iconData == null)
                 const Icon(
                   Icons.add_circle_outline_rounded,
                   color: kTextFieldTextColor,

@@ -1,60 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:lista_tarefas/pages/todo_page/todo_store.dart';
 
-import '../shared/constant.dart';
+class DeletePage extends StatelessWidget {
+  final TodoStore _todoStore;
+  final List<String> deletedTasks;
 
-class DeletePage extends StatefulWidget {
-  final List<String> deletedItems;
-  const DeletePage({Key? key, required this.deletedItems}) : super(key: key);
+  const DeletePage(this._todoStore, this.deletedTasks, {super.key});
 
-  @override
-  State<DeletePage> createState() => _DeletePageState();
-}
-
-class _DeletePageState extends State<DeletePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lixeira'),
-        centerTitle: true,
-        backgroundColor: kAppBarColor,
-      ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          height: 500,
-          width: 500,
-          child: ListView.builder(
-            itemCount: widget.deletedItems.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(widget.deletedItems[index]),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        MdiIcons.deleteRestore,
-                        color: kIconColor,
-                        size: 25,
-                      ),
-                      onPressed: () {},
+      appBar: AppBar(title: Text('Deleted Tasks')),
+      body: Observer(
+        builder: (_) => _todoStore.deletedTasks.isEmpty
+            ? Center(child: Text('Nada na lixeira'))
+            : ListView.builder(
+                itemCount: _todoStore.deletedTasks.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_todoStore.deletedTasks[index]),
+                    trailing: IconButton(
+                      icon: Icon(Icons.restore),
+                      onPressed: () {
+                        _todoStore.addTask(_todoStore.deletedTasks[index]);
+                        _todoStore.deletedTasks.removeAt(index);
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.delete_forever_rounded,
-                        color: kIconRemoveColor,
-                        size: 25,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+                  );
+                },
+              ),
       ),
     );
   }
