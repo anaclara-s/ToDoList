@@ -34,7 +34,7 @@ abstract class TodoStoreBase with Store {
   }
 
   @action
-  Future<void> putTask(String task, index) async {
+  Future<void> putTask(String task, int index) async {
     tasks[index] = task;
     await saveList(tasks);
   }
@@ -45,6 +45,11 @@ abstract class TodoStoreBase with Store {
     deletedTasks.add(task);
     await saveList(tasks);
     await saveDeletedList(deletedTasks);
+  }
+
+  @action
+  Future<void> saveOrder() async {
+    await SharedPreferencesRepository.putStringList(tasks, 'my_tasks');
   }
 
   Future<void> saveList(List<String> list) async {

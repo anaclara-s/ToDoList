@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import '../../shared/constant.dart';
 import '../delete_page.dart';
 import 'todo_store.dart';
-
+import '../../shared/widgets/custom_app_bar.dart';
+import '../../shared/widgets/custom_text_form_field.dart';
 import '../../shared/widgets/custom_alert_dialog.dart';
 
 class TodoPage extends StatefulWidget {
@@ -20,7 +20,6 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   final TodoStore _todoStore = TodoStore();
 
-  final FocusNode _focusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -38,11 +37,8 @@ class _TodoPageState extends State<TodoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TO DO LIST'),
-        centerTitle: true,
-        backgroundColor: kAppBarColor,
-        elevation: 2,
+      appBar: CustomAppBar(
+        title: Text('TO DO LIST'),
         actions: [
           IconButton(
             onPressed: () {
@@ -65,20 +61,16 @@ class _TodoPageState extends State<TodoPage> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
                   width: 350,
                   child: Form(
                     key: _formKey,
                     autovalidateMode: AutovalidateMode.disabled,
-                    child: TextFormField(
+                    child: CustomTextFormField(
+                      hintText: 'Digite um item',
                       controller: _todoStore.todoTextController,
-                      focusNode: _focusNode,
-                      autofocus: true,
-                      textAlign: TextAlign.center,
                       onFieldSubmitted: (value) {
-                        _focusNode.requestFocus();
                         if (_formKey.currentState!.validate()) {
                           _todoStore.addTask(value);
                         }
@@ -89,74 +81,70 @@ class _TodoPageState extends State<TodoPage> {
                         }
                         return null;
                       },
+                      focusNode: null,
                     ),
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 40),
             Observer(
               builder: (_) => Expanded(
-                child: Container(
-                  color: const Color.fromARGB(255, 197, 187, 186),
-                  child: ReorderableListView(
-                    shrinkWrap: true,
-                    onReorder: ((oldIndex, newIndex) {
-                      setState(() {
-                        if (newIndex > oldIndex) {
-                          newIndex -= 1;
-                        }
-                        final String item = _todoStore.tasks.removeAt(oldIndex);
-                        _todoStore.tasks.insert(newIndex, item);
-                      });
-                    }),
-                    children: _todoStore.tasks
-                        .asMap()
-                        .entries
-                        .map((entry) => ListTile(
-                              key: Key('${entry.key}-${entry.value}'),
-                              title: Center(
-                                child: Text(
-                                  entry.value,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      color: Colors.black),
+                child: ReorderableListView(
+                  shrinkWrap: true,
+                  onReorder: ((oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final String item = _todoStore.tasks.removeAt(oldIndex);
+                      _todoStore.tasks.insert(newIndex, item);
+                      _todoStore.saveOrder();
+                    });
+                  }),
+                  children: _todoStore.tasks
+                      .asMap()
+                      .entries
+                      .map((entry) => ListTile(
+                            key: Key('${entry.key}-${entry.value}'),
+                            title: Center(
+                              child: Text(
+                                entry.value,
+                                style: const TextStyle(
+                                  fontSize: 20,
                                 ),
                               ),
-                              leading: GestureDetector(
-                                onTap: () {},
-                                child: Icon(
-                                  MdiIcons.unfoldMoreHorizontal,
-                                  color: Colors.red,
-                                  size: 30,
-                                ),
+                            ),
+                            leading: GestureDetector(
+                              onTap: () {},
+                              child: Icon(
+                                MdiIcons.unfoldMoreHorizontal,
                               ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.cancel_outlined,
-                                  color: Colors.amber,
-                                  size: 30,
-                                ),
-                                onPressed: () async {
-                                  final resp = await CustomAlertDialog.instance
-                                      .asyncConfirmDialog(
-                                    context: context,
-                                    title: 'Confirmar',
-                                    textConfirm: 'Excluir',
-                                    textCancel: 'Cancelar',
-                                    content: Text(
-                                        'Tem certeza que deseja excluir esse item?'),
-                                  );
-                                  if (resp != null && resp['resp'] == true) {
-                                    String taskToDelete =
-                                        _todoStore.tasks[entry.key];
-                                    _todoStore.removeTask(taskToDelete);
-                                  }
-                                },
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.cancel_outlined,
+                                color: Color.fromARGB(255, 253, 97, 86),
                               ),
-                            ))
-                        .toList(),
-                  ),
+                              onPressed: () async {
+                                final resp = await CustomAlertDialog.instance
+                                    .asyncConfirmDialog(
+                                  context: context,
+                                  title: 'Confirmar',
+                                  textConfirm: 'Excluir',
+                                  textCancel: 'Cancelar',
+                                  content: Text(
+                                      'Tem certeza que deseja excluir esse item?'),
+                                );
+                                if (resp != null && resp['resp'] == true) {
+                                  String taskToDelete =
+                                      _todoStore.tasks[entry.key];
+                                  _todoStore.removeTask(taskToDelete);
+                                }
+                              },
+                            ),
+                          ))
+                      .toList(),
                 ),
               ),
             ),

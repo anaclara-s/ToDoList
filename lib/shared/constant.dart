@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-const kIconColor = Color.fromARGB(255, 135, 105, 240);
+const kAppBarIconColorDark = Color.fromARGB(255, 2, 43, 223);
+const kAppBarIconColorLight = Color.fromARGB(255, 255, 0, 0);
 
 const kIconAddColor = Color.fromARGB(255, 105, 240, 134);
 

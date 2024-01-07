@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:lista_tarefas/pages/todo_page/todo_store.dart';
+
+import '../shared/widgets/custom_app_bar.dart';
+import 'todo_page/todo_store.dart';
 
 class DeletePage extends StatelessWidget {
   final TodoStore _todoStore;
@@ -11,7 +13,7 @@ class DeletePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Deleted Tasks')),
+      appBar: CustomAppBar(title: Text('Deleted Tasks')),
       body: Observer(
         builder: (_) => _todoStore.deletedTasks.isEmpty
             ? Center(child: Text('Nada na lixeira'))
