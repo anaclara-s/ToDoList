@@ -124,29 +124,62 @@ class _TodoPageState extends State<TodoPage> {
                                       MdiIcons.unfoldMoreHorizontal,
                                     ),
                                   ),
-                                  trailing: IconButton(
-                                    icon: const Icon(
-                                      Icons.cancel_outlined,
-                                      color: Color.fromARGB(255, 253, 97, 86),
-                                    ),
-                                    onPressed: () async {
-                                      final resp = await CustomAlertDialog
-                                          .instance
-                                          .asyncConfirmDialog(
-                                        context: context,
-                                        title: 'Excluir item',
-                                        textConfirm: 'Excluir',
-                                        textCancel: 'Cancelar',
-                                        content: const Text(
-                                            'Tem certeza que deseja excluir esse item?'),
-                                      );
-                                      if (resp != null &&
-                                          resp['resp'] == true) {
-                                        String taskToDelete =
-                                            _todoStore.tasks[entry.key];
-                                        _todoStore.removeTask(taskToDelete);
-                                      }
-                                    },
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () async {
+                                          String originalValue =
+                                              _todoStore.tasks[entry.key];
+                                          String newValue = '';
+                                          final resp = await CustomAlertDialog
+                                              .instance
+                                              .asyncConfirmDialog(
+                                            context: context,
+                                            title: 'Edição',
+                                            textConfirm: 'Salvar',
+                                            textCancel: 'Cancelar',
+                                            content: TextFormField(
+                                              initialValue: originalValue,
+                                              onChanged: (value) {
+                                                newValue = value;
+                                              },
+                                            ),
+                                          );
+                                          if (resp != null &&
+                                              resp['resp'] == true) {
+                                            _todoStore.putTask(
+                                                newValue, entry.key);
+                                          }
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.cancel_outlined,
+                                          color:
+                                              Color.fromARGB(255, 253, 97, 86),
+                                        ),
+                                        onPressed: () async {
+                                          final resp = await CustomAlertDialog
+                                              .instance
+                                              .asyncConfirmDialog(
+                                            context: context,
+                                            title: 'Excluir item',
+                                            textConfirm: 'Excluir',
+                                            textCancel: 'Cancelar',
+                                            content: const Text(
+                                                'Tem certeza que deseja excluir esse item?'),
+                                          );
+                                          if (resp != null &&
+                                              resp['resp'] == true) {
+                                            String taskToDelete =
+                                                _todoStore.tasks[entry.key];
+                                            _todoStore.removeTask(taskToDelete);
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ))
                             .toList(),

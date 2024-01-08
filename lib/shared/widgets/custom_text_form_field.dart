@@ -6,14 +6,18 @@ class CustomTextFormField extends StatefulWidget {
   final void Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
   final String? hintText;
+  final String? initialValue;
+  final void Function(String)? onChanged;
 
   const CustomTextFormField({
     super.key,
-    required this.controller,
-    required this.focusNode,
-    required this.onFieldSubmitted,
-    required this.validator,
+    this.controller,
+    this.focusNode,
+    this.onFieldSubmitted,
+    this.validator,
     this.hintText,
+    this.initialValue,
+    this.onChanged,
   });
 
   @override
@@ -30,6 +34,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       decoration: InputDecoration(
         hintText: widget.hintText,
       ),
+      initialValue: widget.initialValue,
+      onChanged: widget.onChanged,
       autofocus: true,
       textAlign: TextAlign.center,
     );
