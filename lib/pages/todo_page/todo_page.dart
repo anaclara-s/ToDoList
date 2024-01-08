@@ -38,7 +38,7 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: const Text('TO DO LIST'),
+        text: 'TO DO LIST',
         actions: [
           IconButton(
             icon: const Icon(

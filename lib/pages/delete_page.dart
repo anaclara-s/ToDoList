@@ -16,18 +16,18 @@ class DeletePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: const Text('Lixeira'),
+        text: 'Lixeira',
         actions: [
           IconButton(
             icon: Icon(MdiIcons.deleteAlert),
             onPressed: () async {
               final resp = await CustomAlertDialog.instance.asyncConfirmDialog(
                 context: context,
-                title: 'Atenção!',
-                textConfirm: 'Excluir',
+                title: 'Esvaziar lixeira',
+                textConfirm: 'Esvaziar',
                 textCancel: 'Cancelar',
                 content: const Text(
-                    'Tem certeza que deseja EXCLUIR PERMANENTEMENTE TODOS OS ITENS?\nA ação não poderá ser desfeita.'),
+                    'Todos os itens seram exluidos permanentemente.\nA ação não poderá ser desfeita.\nTem certeza que quer realizar essa ação?'),
               );
               if (resp != null && resp['resp'] == true) {
                 _todoStore.deleteAllTasks();
