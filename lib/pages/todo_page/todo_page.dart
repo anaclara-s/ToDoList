@@ -38,9 +38,12 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: Text('TO DO LIST'),
+        title: const Text('TO DO LIST'),
         actions: [
           IconButton(
+            icon: const Icon(
+              Icons.auto_delete,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -50,9 +53,6 @@ class _TodoPageState extends State<TodoPage> {
                 ),
               );
             },
-            icon: const Icon(
-              Icons.delete_rounded,
-            ),
           ),
         ],
       ),
@@ -87,66 +87,71 @@ class _TodoPageState extends State<TodoPage> {
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Observer(
-              builder: (_) => Expanded(
-                child: ReorderableListView(
-                  shrinkWrap: true,
-                  onReorder: ((oldIndex, newIndex) {
-                    setState(() {
-                      if (newIndex > oldIndex) {
-                        newIndex -= 1;
-                      }
-                      final String item = _todoStore.tasks.removeAt(oldIndex);
-                      _todoStore.tasks.insert(newIndex, item);
-                      _todoStore.saveOrder();
-                    });
-                  }),
-                  children: _todoStore.tasks
-                      .asMap()
-                      .entries
-                      .map((entry) => ListTile(
-                            key: Key('${entry.key}-${entry.value}'),
-                            title: Center(
-                              child: Text(
-                                entry.value,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                            leading: GestureDetector(
-                              onTap: () {},
-                              child: Icon(
-                                MdiIcons.unfoldMoreHorizontal,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.cancel_outlined,
-                                color: Color.fromARGB(255, 253, 97, 86),
-                              ),
-                              onPressed: () async {
-                                final resp = await CustomAlertDialog.instance
-                                    .asyncConfirmDialog(
-                                  context: context,
-                                  title: 'Confirmar',
-                                  textConfirm: 'Excluir',
-                                  textCancel: 'Cancelar',
-                                  content: Text(
-                                      'Tem certeza que deseja excluir esse item?'),
-                                );
-                                if (resp != null && resp['resp'] == true) {
-                                  String taskToDelete =
-                                      _todoStore.tasks[entry.key];
-                                  _todoStore.removeTask(taskToDelete);
-                                }
-                              },
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ),
+              builder: (_) => _todoStore.tasks.isEmpty
+                  ? Text('Lista vazia')
+                  : Expanded(
+                      child: ReorderableListView(
+                        shrinkWrap: true,
+                        onReorder: ((oldIndex, newIndex) {
+                          setState(() {
+                            if (newIndex > oldIndex) {
+                              newIndex -= 1;
+                            }
+                            final String item =
+                                _todoStore.tasks.removeAt(oldIndex);
+                            _todoStore.tasks.insert(newIndex, item);
+                            _todoStore.saveOrder();
+                          });
+                        }),
+                        children: _todoStore.tasks
+                            .asMap()
+                            .entries
+                            .map((entry) => ListTile(
+                                  key: Key('${entry.key}-${entry.value}'),
+                                  title: Center(
+                                    child: Text(
+                                      entry.value,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  leading: GestureDetector(
+                                    onTap: () {},
+                                    child: Icon(
+                                      MdiIcons.unfoldMoreHorizontal,
+                                    ),
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(
+                                      Icons.cancel_outlined,
+                                      color: Color.fromARGB(255, 253, 97, 86),
+                                    ),
+                                    onPressed: () async {
+                                      final resp = await CustomAlertDialog
+                                          .instance
+                                          .asyncConfirmDialog(
+                                        context: context,
+                                        title: 'Excluir item',
+                                        textConfirm: 'Excluir',
+                                        textCancel: 'Cancelar',
+                                        content: const Text(
+                                            'Tem certeza que deseja excluir esse item?'),
+                                      );
+                                      if (resp != null &&
+                                          resp['resp'] == true) {
+                                        String taskToDelete =
+                                            _todoStore.tasks[entry.key];
+                                        _todoStore.removeTask(taskToDelete);
+                                      }
+                                    },
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
             ),
           ],
         ),

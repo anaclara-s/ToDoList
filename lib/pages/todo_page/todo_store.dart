@@ -48,6 +48,12 @@ abstract class TodoStoreBase with Store {
   }
 
   @action
+  Future<void> deleteAllTasks() async {
+    deletedTasks.clear();
+    await saveDeletedList(deletedTasks);
+  }
+
+  @action
   Future<void> saveOrder() async {
     await SharedPreferencesRepository.putStringList(tasks, 'my_tasks');
   }
