@@ -90,7 +90,7 @@ class _TodoPageState extends State<TodoPage> {
             const SizedBox(height: 40),
             Observer(
               builder: (_) => _todoStore.tasks.isEmpty
-                  ? Text('Lista vazia')
+                  ? const Text('Lista vazia')
                   : Expanded(
                       child: ReorderableListView(
                         shrinkWrap: true,
